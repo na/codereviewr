@@ -32,8 +32,8 @@ class Code(models.Model):
  
 class Language(models.Model):
     """
-Lookup table for languages, generate via Pygments
-"""
+    Lookup table for languages, generate via Pygments
+    """
     name = models.CharField(max_length=100)
     
     class Admin:

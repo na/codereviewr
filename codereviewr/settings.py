@@ -35,6 +35,9 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
+# Login URL
+LOGIN_URL = '/login/'
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = ''
@@ -83,7 +86,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
-	'django.contrib.comments',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
