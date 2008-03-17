@@ -13,8 +13,8 @@ from pygments.lexers import get_lexer_for_filename
  
 def code_detail(request, code_id):
     """
-Displays a single piece of code.
-"""
+    Displays a single piece of code.
+    """
     try:
         code = Code.objects.get(pk=code_id)
     except Code.DoesNotExist:
@@ -34,8 +34,8 @@ Displays a single piece of code.
  
 def code_list(request):
     """
-Lists all code flagged as is_public.
-"""
+    Lists all code flagged as is_public.
+    """
     codes = Code.objects.filter(is_public=True)
  
     if not codes:
