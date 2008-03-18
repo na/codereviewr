@@ -1,3 +1,4 @@
+from difflib import Differ
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
@@ -23,7 +24,7 @@ class CodeForm(ModelForm):
 # VIEWS
 # 
 
-def code_detail(request, code_id):
+def code_detail(request, code_id, compare_to_parent=False):
     """
     Displays a single piece of code.
     """
@@ -31,16 +32,25 @@ def code_detail(request, code_id):
         code = Code.objects.get(pk=code_id)
     except Code.DoesNotExist:
         raise Http404, "Sorry, the code you requested was not found."
- 
+
+    diff_list = Code.objects.filter(parent=code.id)
+    code.highlight = ""
     # Pygmentize code
     lexer = get_lexer_for_filename('test.py', stripall=True)
     formatter = HtmlFormatter(linenos=True, cssclass="source")
-    
     code.highlight = highlight(code.code, lexer, formatter)
     
+    #compare to parent
+    if compare_to_parent:
+        diff = Differ()
+        comp = list(diff.compare(code.parent.code.split('\n'),code.code.split('\n')))
+        code.highlight = highlight(''.join(comp), lexer,formatter)
+        
     return render_to_response(
         'code/detail.html',
-        {'code': code},
+        {'code': code,
+         'diff_list':diff_list,
+        },
         context_instance=RequestContext(request)
     )
  
@@ -60,7 +70,7 @@ def code_list(request):
         template_object_name='code',
         paginate_by=50,
     )
- 
+   
 @login_required
 def code_add(request):
     code = Code()
@@ -81,17 +91,7 @@ def code_add(request):
         {'form': form},
         context_instance=RequestContext(request)
     )
- 
+        
 def refresh_languages(request):
     Language.load_languages()
     return HttpResponseRedirect('/admin/code/language/')
- 
-#
-# FORMS
-#
- 
-class CodeForm(ModelForm):
-    class Meta:
-        model = Code
-        fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
-

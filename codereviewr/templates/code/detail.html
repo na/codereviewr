@@ -3,6 +3,13 @@
 {% block title_block %}code-detail{% endblock %}
 
 {% block content %}
+    {% if diff_list %}
+    <ul>
+    {% for diff in diff_list %}
+    <li><a href={{ diff.get_absolute_url }}>{{ diff.title }}</a></li>
+    {% endfor%}
+    </ul>
+    {% endif%}
 	<h1>{{ code.title }}</h1>
 	<div id="meta">
 		{{ code.author.username }}
