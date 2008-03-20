@@ -1,4 +1,3 @@
-from difflib import Differ
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
@@ -10,7 +9,7 @@ from codereviewr.code.models import Code, Language
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
-
+from codereviewr.code.util import DiffHtmlFormatter
 #
 # FORMS
 #
@@ -42,9 +41,9 @@ def code_detail(request, code_id, compare_to_parent=False):
     
     #compare to parent
     if compare_to_parent:
-        diff = Differ()
-        comp = list(diff.compare(code.parent.code.split('\n'),code.code.split('\n')))
-        code.highlight = highlight(''.join(comp), lexer,formatter)
+        lexer = get_lexer_for_filename('test.diff')
+        formatter = DiffHtmlFormatter(cssclass="source") #carefull css options might break the regular expressions
+        code.highlight = highlight(code.compare_to_parent(), lexer, formatter)
         
     return render_to_response(
         'code/detail.html',

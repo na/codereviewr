@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿from difflib import unified_diff
+from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
  
@@ -20,6 +21,12 @@ class Code(models.Model):
     
     def __unicode__(self):
         return "%s by %s" % (self.title, self.author.get_full_name())
+    
+    def compare_to_parent(self, lines=3):
+        #diff = Differ()
+        #comp = list(diff.compare(code.parent.code.split('\n'),code.code.split('\n')))
+        comp = list(unified_diff(self.parent.code.split('\n'),self.code.split('\n'),'orig.','sugg.',n=lines))
+        return ''.join(comp)
 
     def get_absolute_url(self):
         return ('code_detail',[str(self.id)])
