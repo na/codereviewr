@@ -28,18 +28,17 @@
         <input type="submit" value="Sign In" class="submit-bttn">
         </fieldset>
         </form>
-        <form action="login_submit" method="get" accept-charset="utf-8">
+        <form action="/accounts/login/" method="POST" accept-charset="utf-8">
             <fieldset>
                 <label for="username">Username</label><input type="text" name="username" value="" id="username">
                 <label for="password">Password</label><input type="text" name="password" value="" id="password">
                 <input type="submit" value="Submit" class="submit-bttn">
-                </fieldset>
+			</fieldset>
         </form>
     </div>
     <div class="span-7 column last">
         <h3>Wanna Contribute?</h3>
-        <h4><a href="" title="">Register for an account</a></h4>
-        
+		<h4><a href="/accounts/register/" class="" title="Register">Register for an account</a></h4>
         <h4>Forgot Your Login?</h4>
         <p>Have your <a href="" title="">login emailed to you</a>.</p>
         
