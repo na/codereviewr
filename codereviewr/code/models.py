@@ -50,3 +50,19 @@ class Language(models.Model):
         cls.objects.all().delete() # purge all languages
         for l in languages:
             Language(name=l).save() # add language
+
+class Comment(models.Model):
+	"""
+	Core comments model for code comments
+	"""
+	code = models.ForeignKey(Code)
+	comment = models.TextField(blank=False)
+	authoremail = models.EmailField(blank=False)
+	lineno = models.IntegerField(blank=True)
+	date = models.DateTimeField(default=datetime.now)
+	
+	def __unicode__(self):
+		return "comment on %s by %s" % (self.code, self.author)
+		
+	class Admin:
+		list_display = ('code','lineno','comment', 'authoremail')

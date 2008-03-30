@@ -22,7 +22,16 @@ class CodeForm(ModelForm):
 #
 # VIEWS
 # 
-
+def code_comment(request, code_id, comment_id):
+	"""
+	Displays a piece of code with Comment
+	"""
+	try:
+		code = Code.objects.get(pk=code_id)
+	except Code.DoesNotExisit:
+		raise Http404, "Sorry, you requested comments for a code that does not exist."
+		
+	
 def code_detail(request, code_id):
     """
     Displays a single piece of code.
@@ -34,7 +43,7 @@ def code_detail(request, code_id):
  
     # Pygmentize code
     lexer = get_lexer_for_filename('test.py', stripall=True)
-    formatter = HtmlFormatter(linenos=True, cssclass="source")
+    formatter = HtmlFormatter(linenos=True, cssclass="source", lineanchors="foo") 
     
     code.highlight = highlight(code.code, lexer, formatter)
     
@@ -85,13 +94,3 @@ def code_add(request):
 def refresh_languages(request):
     Language.load_languages()
     return HttpResponseRedirect('/admin/code/language/')
- 
-#
-# FORMS
-#
- 
-class CodeForm(ModelForm):
-    class Meta:
-        model = Code
-        fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
-
