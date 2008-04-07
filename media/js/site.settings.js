@@ -5,9 +5,9 @@
  *
  */
  $(document).ready(function(){
-    $('.close').click(function() {
-        $(this).parent.close();
-        $(this).parent.('.loginout').toggle();
+    $('.showhide a').click(function(){
+        $('#meta').slideToggle('fast');
+        $('.showhide a').toggle();
         return false;
     });
  });
