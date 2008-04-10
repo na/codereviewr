@@ -22,10 +22,7 @@ class CodeForm(ModelForm):
 #
 # VIEWS
 # 
-<<<<<<< HEAD:codereviewr/code/views.py
 
-def code_detail(request, code_id, compare_to_parent=False):
-=======
 def code_comment(request, code_id, comment_id):
 	"""
 	Displays a piece of code with Comment
@@ -36,8 +33,7 @@ def code_comment(request, code_id, comment_id):
 		raise Http404, "Sorry, you requested comments for a code that does not exist."
 		
 	
-def code_detail(request, code_id):
->>>>>>> master:codereviewr/code/views.py
+def code_detail(request, code_id, compare_to_parent=False):
     """
     Displays a single piece of code.
     """
@@ -50,12 +46,7 @@ def code_detail(request, code_id):
     code.highlight = ""
     # Pygmentize code
     lexer = get_lexer_for_filename('test.py', stripall=True)
-<<<<<<< HEAD:codereviewr/code/views.py
-    formatter = HtmlFormatter(linenos=True, cssclass="source")
-=======
-    formatter = HtmlFormatter(linenos=True, cssclass="source", lineanchors="foo") 
-    
->>>>>>> master:codereviewr/code/views.py
+    formatter = HtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
     code.highlight = highlight(code.code, lexer, formatter)
     
     #compare to parent

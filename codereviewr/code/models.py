@@ -57,9 +57,6 @@ class Language(models.Model):
         languages = [item[1] for item in LEXERS.itervalues()]
         cls.objects.all().delete() # purge all languages
         for l in languages:
-<<<<<<< HEAD:codereviewr/code/models.py
-            Language(name=l).save() # add language
-=======
             Language(name=l).save() # add language
 
 class Comment(models.Model):
@@ -77,4 +74,3 @@ class Comment(models.Model):
 		
 	class Admin:
 		list_display = ('code','lineno','comment', 'authoremail')
->>>>>>> master:codereviewr/code/models.py

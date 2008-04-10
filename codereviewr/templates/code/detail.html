@@ -3,7 +3,7 @@
 {% block title_block %}code-detail{% endblock %}
 
 {% block content %}
-<<<<<<< HEAD:codereviewr/templates/code/detail.html
+
     {% if diff_list %}
     <ul>
     {% for diff in diff_list %}
@@ -15,7 +15,7 @@
 	<div id="meta">
 		{{ code.author.username }}
 		{{ code.description }}
-=======
+
     {% if code.is_public %}
         <h1 class="public code-title">{{ code.title }} <img src="{{MEDIA_URL}}imgs/public.png" alt="Public"></h1>
     {% else %}
@@ -53,7 +53,7 @@
             <h4>Description:</h4>
 	       	{{ code.description }}
 	    </div>
->>>>>>> master:codereviewr/templates/code/detail.html
+
 	</div>
 	<div id="page-content">
 	    <div class="showhide">
