@@ -1,5 +1,11 @@
+<<<<<<< HEAD:codereviewr/code/util.py
 """TODO: [1] Build regex with css options.""" 
+=======
+﻿from pygments.formatters import HtmlFormatter
+import StringIO
+>>>>>>> master:codereviewr/code/util.py
 """
+<<<<<<< HEAD:codereviewr/code/util.py
     pygments formatter
     
     Formatter for and only for Diff lexer
@@ -9,10 +15,27 @@
     
     options: see HtmlFormatter options
         note: care needs to be taken when specifying css classes.  Currently the regexs can be broken by these option.  
+=======
+	LineLinkHtmlFormatter
+	Formatter for pygments syntax highlighting which adds anchor tags to the line number
+>>>>>>> master:codereviewr/code/util.py
 """
+<<<<<<< HEAD:codereviewr/code/util.py
 import re
 from pygments.formatters import HtmlFormatter
+=======
+class LineLinkHtmlFormatter(HtmlFormatter):
+		"""override to include anchor tags around the line numbers"""
+		def _wrap_tablelinenos(self, inner):
+			dummyoutfile = StringIO.StringIO()
+			lncount = 0
+			for t, line in inner:
+				if t:
+					lncount += 1
+				dummyoutfile.write(line)
+>>>>>>> master:codereviewr/code/util.py
 
+<<<<<<< HEAD:codereviewr/code/util.py
 class DiffHtmlFormatter(HtmlFormatter):
     def wrap(self, source, outfile):
         return self._tablize(source)
@@ -92,3 +115,27 @@ class DiffHtmlFormatter(HtmlFormatter):
             else:
                 outfile.write(piece)
     """
+=======
+			fl = self.linenostart
+			mw = len(str(lncount + fl - 1))
+			sp = self.linenospecial
+			st = self.linenostep
+			la = self.lineanchors
+			if sp:
+				ls = '\n'.join([(i%st == 0 and
+								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
+								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+								 or '')
+								for i in range(fl, fl + lncount)])
+			else: 
+				ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+								for i in range(fl, fl + lncount)])
+				#ls = ''
+				#for i in range (fl, fl+ lncount):
+				#	ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i) 
+			yield 0, ('<table class="%stable">' % self.cssclass +
+					  '<tr><td class="linenos"><pre>' + 
+					  ls + '</pre></td><td class="code">')
+			yield 0, dummyoutfile.getvalue()
+			yield 0, '</td></tr></table>'
+>>>>>>> master:codereviewr/code/util.py
