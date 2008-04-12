@@ -1,11 +1,7 @@
-<<<<<<< HEAD:codereviewr/code/util.py
 """TODO: [1] Build regex with css options.""" 
-=======
-﻿from pygments.formatters import HtmlFormatter
-import StringIO
->>>>>>> master:codereviewr/code/util.py
+
 """
-<<<<<<< HEAD:codereviewr/code/util.py
+
     pygments formatter
     
     Formatter for and only for Diff lexer
@@ -15,15 +11,33 @@ import StringIO
     
     options: see HtmlFormatter options
         note: care needs to be taken when specifying css classes.  Currently the regexs can be broken by these option.  
-=======
+
 	LineLinkHtmlFormatter
 	Formatter for pygments syntax highlighting which adds anchor tags to the line number
->>>>>>> master:codereviewr/code/util.py
+
 """
-<<<<<<< HEAD:codereviewr/code/util.py
+import StringIO
 import re
 from pygments.formatters import HtmlFormatter
-=======
+
+class CodereviewerHtmlFormatter(HtmlFormatter):
+
+		def wrap(self, source, outfile):
+			return self._wrap_code(source)
+
+		def _wrap_code(self, source):
+			j=1
+			yield 0, '<pre><table>'
+			for i, t in source:
+				if i == 1:
+					b = '<tr id="line-%d"><td>' % j
+					e = '</td></tr>'
+					t = b+t+e
+					# it's a line of formatted code
+					yield i, t
+					j += 1
+			yield 0, '</table></pre>'
+				
 class LineLinkHtmlFormatter(HtmlFormatter):
 		"""override to include anchor tags around the line numbers"""
 		def _wrap_tablelinenos(self, inner):
@@ -33,9 +47,30 @@ class LineLinkHtmlFormatter(HtmlFormatter):
 				if t:
 					lncount += 1
 				dummyoutfile.write(line)
->>>>>>> master:codereviewr/code/util.py
+			
+			fl = self.linenostart
+			mw = len(str(lncount + fl - 1))
+			sp = self.linenospecial
+			st = self.linenostep
+			la = self.lineanchors
+			if sp:
+				ls = '\n'.join([(i%st == 0 and
+								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
+								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+								 or '')
+								for i in range(fl, fl + lncount)])
+			else: 
+				ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+								for i in range(fl, fl + lncount)])
+				#ls = ''
+				#for i in range (fl, fl+ lncount):
+				#	ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i) 
+			yield 0, ('<table class="%stable">' % self.cssclass +
+					  '<tr><td class="linenos"><pre>' + 
+					  ls + '</pre></td><td class="code">')
+			yield 0, dummyoutfile.getvalue()
+			yield 0, '</td></tr></table>'
 
-<<<<<<< HEAD:codereviewr/code/util.py
 class DiffHtmlFormatter(HtmlFormatter):
     def wrap(self, source, outfile):
         return self._tablize(source)
@@ -91,51 +126,3 @@ class DiffHtmlFormatter(HtmlFormatter):
                         
             i += 1
         yield 0, '</tbody></table>'
-""" def __init__(self, **options):
-        HtmlFormatter.__init__(self, **options)
-        
-    def format(self, tokensource, outfile):
-   
-        source = self._format_lines(tokensource)
-        if not self.nowrap:
-            if self.linenos == 2:
-                source = self._wrap_inlinelinenos(source)
-            if self.lineanchors:
-                source = self._wrap_lineanchors(source)
-            source = self.wrap(source, outfile)
-            if self.linenos == 1:
-                source = self._wrap_tablelinenos(source)
-            if self.full:
-                source = self._wrap_full(source, outfile)
-
-        for t, piece in source:
-            if piece[1:5]=='span':
-                outfile.write('delete')
-                outfile.write(piece)
-            else:
-                outfile.write(piece)
-    """
-=======
-			fl = self.linenostart
-			mw = len(str(lncount + fl - 1))
-			sp = self.linenospecial
-			st = self.linenostep
-			la = self.lineanchors
-			if sp:
-				ls = '\n'.join([(i%st == 0 and
-								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
-								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
-								 or '')
-								for i in range(fl, fl + lncount)])
-			else: 
-				ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
-								for i in range(fl, fl + lncount)])
-				#ls = ''
-				#for i in range (fl, fl+ lncount):
-				#	ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i) 
-			yield 0, ('<table class="%stable">' % self.cssclass +
-					  '<tr><td class="linenos"><pre>' + 
-					  ls + '</pre></td><td class="code">')
-			yield 0, dummyoutfile.getvalue()
-			yield 0, '</td></tr></table>'
->>>>>>> master:codereviewr/code/util.py
