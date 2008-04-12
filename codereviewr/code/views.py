@@ -9,7 +9,7 @@ from codereviewr.code.models import Code, Language
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
-from codereviewr.code.util import DiffHtmlFormatter
+from codereviewr.code.util import *
 #
 # FORMS
 #
@@ -23,7 +23,7 @@ class CodeForm(ModelForm):
 # VIEWS
 # 
 
-def code_comment(request, code_id, comment_id):
+def code_comments(request, code_id):
 	"""
 	Displays a piece of code with Comment
 	"""
@@ -31,7 +31,14 @@ def code_comment(request, code_id, comment_id):
 		code = Code.objects.get(pk=code_id)
 	except Code.DoesNotExisit:
 		raise Http404, "Sorry, you requested comments for a code that does not exist."
-		
+	
+	return render_to_response(
+		'code/comments.html',
+		{'code':code,
+		 'comments': code.comments.all()
+		},
+		context_instance=RequestContext(request)
+	)
 	
 def code_detail(request, code_id, compare_to_parent=False):
     """
@@ -46,7 +53,7 @@ def code_detail(request, code_id, compare_to_parent=False):
     code.highlight = ""
     # Pygmentize code
     lexer = get_lexer_for_filename('test.py', stripall=True)
-    formatter = HtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
+    formatter = LineLinkHtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
     code.highlight = highlight(code.code, lexer, formatter)
     
     #compare to parent
