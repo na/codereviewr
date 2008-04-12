@@ -17,7 +17,7 @@ class Code(models.Model):
     is_public = models.BooleanField(default=True)
     created = models.DateTimeField(default=datetime.now)
     updated = models.DateTimeField(blank=True, default=datetime.now)
-    parent = models.ForeignKey('self', blank=True,null=True,related_name='child_set')
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='child_set')
     
     def __unicode__(self):
         return "%s by %s" % (self.title, self.author.get_full_name())
@@ -63,14 +63,23 @@ class Comment(models.Model):
 	"""
 	Core comments model for code comments
 	"""
-	code = models.ForeignKey(Code)
-	comment = models.TextField(blank=False)
-	authoremail = models.EmailField(blank=False)
+	author = models.CharField(blank=False,max_length=25)
+	email = models.EmailField(blank=False)
+	code = models.ForeignKey(Code, related_name='comments')
 	lineno = models.IntegerField(blank=True)
+	comment = models.TextField(blank=False)
 	date = models.DateTimeField(default=datetime.now)
+	author_is_user = models.BooleanField(default=False,editable=False)
 	
+	def save(self):
+		user = User.objects.filter(username=self.author,email=self.email) 
+		
+		if user.count==1: 
+			self.author_is_user = True
+		super(Comment,self).save()
+
 	def __unicode__(self):
-		return "comment on %s by %s" % (self.code, self.author)
+		return "comment on %s by %s" % (self.code.title, self.author)
 		
 	class Admin:
-		list_display = ('code','lineno','comment', 'authoremail')
+		list_display = ('author','email', 'code', 'lineno','comment')
