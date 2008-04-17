@@ -66,20 +66,21 @@ class Comment(models.Model):
 	author = models.CharField(blank=False,max_length=25)
 	email = models.EmailField(blank=False)
 	code = models.ForeignKey(Code, related_name='comments')
-	lineno = models.IntegerField(blank=True)
+	lineno = models.IntegerField(blank=True, null=True)
 	comment = models.TextField(blank=False)
 	date = models.DateTimeField(default=datetime.now)
-	author_is_user = models.BooleanField(default=False,editable=False)
+	user = models.ForeignKey(User,blank=True,null=True,related_name="comments")
 	
+	"""
 	def save(self):
 		user = User.objects.filter(username=self.author,email=self.email) 
 		
-		if user.count==1: 
+		if user.count()==1: 
 			self.author_is_user = True
 		super(Comment,self).save()
-
+	"""
 	def __unicode__(self):
 		return "comment on %s by %s" % (self.code.title, self.author)
 		
 	class Admin:
-		list_display = ('author','email', 'code', 'lineno','comment')
+		list_display = ('author','email', 'code', 'lineno','comment','user')

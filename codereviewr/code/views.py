@@ -5,7 +5,7 @@ from django.newforms import ModelForm
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.generic.list_detail import object_list, object_detail
-from codereviewr.code.models import Code, Language
+from codereviewr.code.models import Code, Language, Comment
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
@@ -19,6 +19,15 @@ class CodeForm(ModelForm):
         model = Code
         fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
 
+class LoggedInCommentForm(ModelForm):
+	class Meta:
+		model = Comment
+		fields = ('comment')
+
+class CommentForm(ModelForm):
+	class Meta:
+		model = Comment
+		fields = ('name', 'email', 'comment')
 #
 # VIEWS
 # 
@@ -32,6 +41,24 @@ def code_comments(request, code_id):
 	except Code.DoesNotExisit:
 		raise Http404, "Sorry, you requested comments for a code that does not exist."
 	
+	if request.method == 'POST':
+		if request.user.is_authenticated():
+			form = LoggedInCommentForm(data=request.POST)
+			form.author = request.user.username
+			form.email = request.user.email
+			form.author_is_user = True
+		else: 
+			form = CommentForm(data=request.POST,instance=code)
+		
+		if form.is_valid():
+			new_comment = form.save(commit=False)
+			new_code.save()
+			return HttpResponseRedirect(reverse(code_detail, args=(new_code.id,)))
+		else:
+			pass # Some error
+	else:
+		form = CodeForm(instance=code)
+
 	return render_to_response(
 		'code/comments.html',
 		{'code':code,
