@@ -17,8 +17,8 @@
 			{% else %}
 			<li class="comment">
 				<dt>
-					{% if comment.author_is_user %}
-						<a href="{{code.author.get_absolute_url}}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:
+					{% if comment.user %}
+						<a href="{{code.user.get_absolute_url}}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:
 					{% else %}
 						{{comment.author}} said {{ comment.date|timesince }} ago:
 					{% endif %}

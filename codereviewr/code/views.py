@@ -15,9 +15,9 @@ from codereviewr.code.util import *
 #
 
 class CodeForm(ModelForm):
-    class Meta:
-        model = Code
-        fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
+	class Meta:
+		model = Code
+		fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
 
 class LoggedInCommentForm(ModelForm):
 	class Meta:
@@ -34,24 +34,108 @@ class CommentForm(ModelForm):
 
 def code_comments(request, code_id):
 	"""
-	Displays a piece of code with Comment
+	Displays comments for a piece of code.
 	"""
 	try:
 		code = Code.objects.get(pk=code_id)
 	except Code.DoesNotExisit:
 		raise Http404, "Sorry, you requested comments for a code that does not exist."
 	
-	if request.method == 'POST':
-		if request.user.is_authenticated():
-			form = LoggedInCommentForm(data=request.POST)
-			form.author = request.user.username
-			form.email = request.user.email
-			form.author_is_user = True
-		else: 
-			form = CommentForm(data=request.POST,instance=code)
-		
+	# Initialize comment form with user data if user is authenticated
+	data = request.POST.copy()
+	if request.user.is_authenticated():
+		form = LoggedInCommentForm(request.POST)
 		if form.is_valid():
 			new_comment = form.save(commit=False)
+			new_comment.code_id = code_id
+			if request.user.get_full_name():
+				new_comment.author = request.user.get_full_name()
+			else:
+				new_comment.author = request.user.username
+			new_comment.email = request.user.email
+			new_comment.user_id = request.user.id
+			new_comment.save()
+		else:
+			pass #some error
+	else:
+		form = CommentForm(request.POST)
+		
+	return render_to_response(
+		'code/comments.html',
+		{'code':code,
+		'comments': code.comments.all(),
+		'form':form,
+		},
+		context_instance=RequestContext(request)
+	)
+	
+def code_line_comments(request, code_id, line_no):
+	"""
+	Displays line number comments for a piece of code if called by ajax. If not redirects to all comments for the piece of code.
+	"""
+	if request.is_ajax():
+		try:
+			code = Code.objects.get(pk=code_id)
+		except Code.DoesNotExisit:
+			raise Http404, "Sorry, you requested comments for a code that does not exist."
+	else:
+		return HttpResponseRedirect(reverse(code_comments, args =(code_id,)))
+
+def code_detail(request, code_id, compare_to_parent=False):
+	"""
+	Displays a single piece of code.
+	"""
+	try:
+		code = Code.objects.get(pk=code_id)
+	except Code.DoesNotExist:
+		raise Http404, "Sorry, the code you requested was not found."
+
+	diff_list = Code.objects.filter(parent=code.id)
+	code.highlight = ""
+	# Pygmentize code
+	lexer = get_lexer_for_filename('test.py', stripall=True)
+	formatter = LineLinkHtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
+	code.highlight = highlight(code.code, lexer, formatter)
+	
+	#compare to parent
+	if compare_to_parent:
+		lexer = get_lexer_for_filename('test.diff')
+		formatter = DiffHtmlFormatter(cssclass="source") #carefull css options might break the regular expressions
+		code.highlight = highlight(code.compare_to_parent(), lexer, formatter)
+		
+	return render_to_response(
+		'code/detail.html',
+		{'code': code,
+		'diff_list':diff_list,
+		},
+		context_instance=RequestContext(request)
+	)
+
+def code_list(request):
+	"""
+	Lists all code flagged as is_public.
+	"""
+	codes = Code.objects.filter(is_public=True)
+
+	if not codes:
+		raise Http404, "No code to review, sorry."
+	
+	return object_list(
+		request,
+		queryset=codes,
+		template_name='code/list.html',
+		template_object_name='code',
+		paginate_by=50,
+	)
+
+@login_required
+def code_add(request):
+	code = Code()
+	if request.method == 'POST':
+		form = CodeForm(data=request.POST, instance=code)
+		if form.is_valid():
+			new_code = form.save(commit=False)
+			new_code.author_id = request.user.id
 			new_code.save()
 			return HttpResponseRedirect(reverse(code_detail, args=(new_code.id,)))
 		else:
@@ -60,81 +144,11 @@ def code_comments(request, code_id):
 		form = CodeForm(instance=code)
 
 	return render_to_response(
-		'code/comments.html',
-		{'code':code,
-		 'comments': code.comments.all()
-		},
+		'code/add.html',
+		{'form': form},
 		context_instance=RequestContext(request)
 	)
-	
-def code_detail(request, code_id, compare_to_parent=False):
-    """
-    Displays a single piece of code.
-    """
-    try:
-        code = Code.objects.get(pk=code_id)
-    except Code.DoesNotExist:
-        raise Http404, "Sorry, the code you requested was not found."
-
-    diff_list = Code.objects.filter(parent=code.id)
-    code.highlight = ""
-    # Pygmentize code
-    lexer = get_lexer_for_filename('test.py', stripall=True)
-    formatter = LineLinkHtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
-    code.highlight = highlight(code.code, lexer, formatter)
-    
-    #compare to parent
-    if compare_to_parent:
-        lexer = get_lexer_for_filename('test.diff')
-        formatter = DiffHtmlFormatter(cssclass="source") #carefull css options might break the regular expressions
-        code.highlight = highlight(code.compare_to_parent(), lexer, formatter)
-        
-    return render_to_response(
-        'code/detail.html',
-        {'code': code,
-         'diff_list':diff_list,
-        },
-        context_instance=RequestContext(request)
-    )
- 
-def code_list(request):
-    """
-    Lists all code flagged as is_public.
-    """
-    codes = Code.objects.filter(is_public=True)
- 
-    if not codes:
-        raise Http404, "No code to review, sorry."
-    
-    return object_list(
-        request,
-        queryset=codes,
-        template_name='code/list.html',
-        template_object_name='code',
-        paginate_by=50,
-    )
-   
-@login_required
-def code_add(request):
-    code = Code()
-    if request.method == 'POST':
-        form = CodeForm(data=request.POST, instance=code)
-        if form.is_valid():
-            new_code = form.save(commit=False)
-            new_code.author_id = request.user.id
-            new_code.save()
-            return HttpResponseRedirect(reverse(code_detail, args=(new_code.id,)))
-        else:
-            pass # Some error
-    else:
-        form = CodeForm(instance=code)
- 
-    return render_to_response(
-        'code/add.html',
-        {'form': form},
-        context_instance=RequestContext(request)
-    )
-        
+		
 def refresh_languages(request):
-    Language.load_languages()
-    return HttpResponseRedirect('/admin/code/language/')
+	Language.load_languages()
+	return HttpResponseRedirect('/admin/code/language/')

@@ -84,3 +84,6 @@ class Comment(models.Model):
 		
 	class Admin:
 		list_display = ('author','email', 'code', 'lineno','comment','user')
+	
+	class Meta:
+		ordering = ('date',)
