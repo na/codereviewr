@@ -18,6 +18,7 @@
 """
 import StringIO
 import re
+from codereviewr.code.models import Comment
 from pygments.formatters import HtmlFormatter
 
 class CodereviewerHtmlFormatter(HtmlFormatter):
@@ -37,7 +38,47 @@ class CodereviewerHtmlFormatter(HtmlFormatter):
 					yield i, t
 					j += 1
 			yield 0, '</table></pre>'
-				
+
+		"""override to include anchor tags around the line numbers"""
+		def _wrap_tablelinenos(self, inner):
+			dummyoutfile = StringIO.StringIO()
+			lncount = 0
+			for t, line in inner:
+				if t:
+					lncount += 1
+				dummyoutfile.write(line)
+			
+			fl = self.linenostart
+			mw = len(str(lncount + fl - 1))
+			sp = self.linenospecial
+			st = self.linenostep
+			la = self.lineanchors
+			if sp:
+				ls = '\n'.join([(i%st == 0 and
+								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
+								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+								 or '')
+								for i in range(fl, fl + lncount)])
+			else: 
+				"""ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+								for i in range(fl, fl + lncount)])
+				"""
+				ls = ''
+				linecomments = ''
+				for i in range (fl, fl+ lncount):
+					comments = Comment.objects.filter(lineno=i)
+					if comments.count() > 0:
+						linecomments = linecomments + '<tr><td class="hascomment">%d</td></tr>' % comments.count()
+					else:
+						linecomments = linecomments + '<tr><td class="nocomment"></td></tr>'
+					ls = ls + '<tr><td><a href=%s-%d>%d</a></td></tr>' % (la,i,i)
+					
+			yield 0, ('<table class="%stable">' % self.cssclass +
+					  '<tr><td class="commentcount"><table>' + linecomments + '</table></td><td class="linenos"><pre><table>' + 
+					  ls + '</table></pre></td><td class="code">')
+			yield 0, dummyoutfile.getvalue()
+			yield 0, '</td></tr></table>'
+			
 class LineLinkHtmlFormatter(HtmlFormatter):
 		"""override to include anchor tags around the line numbers"""
 		def _wrap_tablelinenos(self, inner):
@@ -60,11 +101,16 @@ class LineLinkHtmlFormatter(HtmlFormatter):
 								 or '')
 								for i in range(fl, fl + lncount)])
 			else: 
-				ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+				"""ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
 								for i in range(fl, fl + lncount)])
-				#ls = ''
-				#for i in range (fl, fl+ lncount):
-				#	ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i) 
+				"""
+				ls = ''
+				linecomments = ''
+				for i in range (fl, fl+ lncount):
+					comments = Comment.objects.filter(lineno=i)
+					linecomments = linecomments + Str(comments.count()) + '/n'
+					ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i)
+					
 			yield 0, ('<table class="%stable">' % self.cssclass +
 					  '<tr><td class="linenos"><pre>' + 
 					  ls + '</pre></td><td class="code">')
