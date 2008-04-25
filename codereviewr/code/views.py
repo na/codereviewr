@@ -9,43 +9,28 @@ from codereviewr.code.models import Code, Language
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
-
+ 
 #
 # FORMS
 #
-
+ 
 class CodeForm(ModelForm):
     class Meta:
         model = Code
-        fields = ('title', 'code', 'description', 'dependencies', 'version', 'is_public')
-
+        fields = ('title', 'language', 'code', 'description', 'dependencies', 'version', 'is_public')
+ 
 #
 # VIEWS
-# 
-def code_comment(request, code_id, comment_id):
-	"""
-	Displays a piece of code with Comment
-	"""
-	try:
-		code = Code.objects.get(pk=code_id)
-	except Code.DoesNotExisit:
-		raise Http404, "Sorry, you requested comments for a code that does not exist."
-		
-	
+#
+ 
 def code_detail(request, code_id):
     """
-    Displays a single piece of code.
-    """
+Displays a single piece of code.
+"""
     try:
         code = Code.objects.get(pk=code_id)
     except Code.DoesNotExist:
         raise Http404, "Sorry, the code you requested was not found."
- 
-    # Pygmentize code
-    lexer = get_lexer_for_filename('test.py', stripall=True)
-    formatter = HtmlFormatter(linenos=True, cssclass="source", lineanchors="foo") 
-    
-    code.highlight = highlight(code.code, lexer, formatter)
     
     return render_to_response(
         'code/detail.html',
@@ -55,8 +40,8 @@ def code_detail(request, code_id):
  
 def code_list(request):
     """
-    Lists all code flagged as is_public.
-    """
+Lists all code flagged as is_public.
+"""
     codes = Code.objects.filter(is_public=True)
  
     if not codes:
