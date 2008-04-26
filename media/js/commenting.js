@@ -6,18 +6,20 @@
  */
  
  $(document).ready(function(){
-    $('.linenos a').click(function(){
+    //$('.nocomment').hover(function(){
+	//});
+	$('.linenos a').click(function(){
         //show comments
 		var line = $(this);
 		var comments = $('#comments')
 		var lineno = parseInt(line.text());
 		var lineOverlay = $('#lineoverlay');
 		var lineOffset = $(this).offset();
-		var marginTop = parseFloat($('pre').css('margin-top'));
-		var offset = this.offsetTop-3;
-		
-		$('#commentlist').load("/code/1/comments #comments li");
-		if ($('#commentlist').css('display')=='none'){
+		var contentOffset = $('#page-content').offset();
+		var offset = lineOffset.top-contentOffset.top;
+		var url = "/code/1/comments/line/" + lineno;
+		comments.load(url);
+		if (comments.css('display')=='none'){
 			comments.css('top',offset);
 			lineOverlay.css('top',offset);
 			lineOverlay.animate(
@@ -25,7 +27,7 @@
 				500,
 				'swing',
 				function(){
-					$('#commentlist').slideDown('slow');
+					comments.slideDown('slow');
 				}
 			);
 		}else{

@@ -75,8 +75,10 @@ em {background:none;}
 
 /* Comments */
 #comments{position:absolute;width:auto;left:70%;;margin-top:-.5em;}
-#commentlist{display:none;float:right;width:350px;height:250px;overflow:auto;background-color:#ccc;}
-#lineoverlay{width:0;height:1.5em;opacity:0.25;background:#FF4444;border-top:1px solid red;border-bottom:1px solid red;position:absolute;}
-
+#comments{display:none;float:right;width:350px;height:250px;overflow:auto;background-color:#ccc;}
+#lineoverlay{width:0;height:1.5em;opacity:0.25;background:#FF4444;border-top:1px solid red;border-bottom:1px solid red;position:absolute;margin-top:-.5em;margin-left:10px;}
+.commentcount table tr{height:1.5em;}
+.commentflag{float:left;margin-left:-37px; min-width:32px; color:white;padding-left:5px;}
+.hascomment {background:url(../imgs/commentflag_bgnd.png) top right no-repeat;}
 /*Code Detail*/
 .sourcetable table td{padding:0px 0px 0px 5px;}

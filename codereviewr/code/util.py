@@ -68,13 +68,12 @@ class CodereviewerHtmlFormatter(HtmlFormatter):
 				for i in range (fl, fl+ lncount):
 					comments = Comment.objects.filter(lineno=i)
 					if comments.count() > 0:
-						linecomments = linecomments + '<tr><td class="hascomment">%d</td></tr>' % comments.count()
+						ls = ls + '<tr><td class="lineno"><div class="commentflag hascomment">%d</div><a href=#%s-%d>%d</a></td></tr>' % (comments.count(),la,i,i)
 					else:
-						linecomments = linecomments + '<tr><td class="nocomment"></td></tr>'
-					ls = ls + '<tr><td><a href=%s-%d>%d</a></td></tr>' % (la,i,i)
+						ls = ls + '<tr><td class="lineno"><div class="commentflag nocomment"></div><a href=#%s-%d>%d</a></td></tr>' % (la,i,i)
 					
 			yield 0, ('<table class="%stable">' % self.cssclass +
-					  '<tr><td class="commentcount"><table>' + linecomments + '</table></td><td class="linenos"><pre><table>' + 
+					  '<tr><td class="linenos"><pre><table>' + 
 					  ls + '</table></pre></td><td class="code">')
 			yield 0, dummyoutfile.getvalue()
 			yield 0, '</td></tr></table>'

@@ -73,11 +73,40 @@ def code_line_comments(request, code_id, line_no):
 	"""
 	Displays line number comments for a piece of code if called by ajax. If not redirects to all comments for the piece of code.
 	"""
+	# Initialize comment form with user data if user is authenticated
+	data = request.POST.copy()
+	if request.user.is_authenticated():
+		form = LoggedInCommentForm(request.POST)
+		if form.is_valid():
+			new_comment = form.save(commit=False)
+			new_comment.code_id = code_id
+			if request.user.get_full_name():
+				new_comment.author = request.user.get_full_name()
+			else:
+				new_comment.author = request.user.username
+			new_comment.email = request.user.email
+			new_comment.user_id = request.user.id
+			new_comment.save()
+		else:
+			pass #some error
+	else:
+		form = CommentForm(request.POST)
+	
 	if request.is_ajax():
 		try:
 			code = Code.objects.get(pk=code_id)
 		except Code.DoesNotExisit:
 			raise Http404, "Sorry, you requested comments for a code that does not exist."
+		
+		return render_to_response(
+			'code/jax_comments.html',
+			{'code': code,
+			'comments': code.comments.filter(lineno=line_no),
+			'form': form,
+			'line_no': line_no,
+			},
+			context_instance=RequestContext(request)
+		)
 	else:
 		return HttpResponseRedirect(reverse(code_comments, args =(code_id,)))
 
@@ -94,7 +123,7 @@ def code_detail(request, code_id, compare_to_parent=False):
 	code.highlight = ""
 	# Pygmentize code
 	lexer = get_lexer_for_filename('test.py', stripall=True)
-	formatter = LineLinkHtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
+	formatter = CodereviewerHtmlFormatter(linenos=True, cssclass="source", lineanchors="line") 
 	code.highlight = highlight(code.code, lexer, formatter)
 	
 	#compare to parent
