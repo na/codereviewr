@@ -96,6 +96,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',    
     'codereviewr.code',
+    'codereviewr.comments',
     'codereviewr.openid_cr',
     'codereviewr.registration',
 )

@@ -18,7 +18,7 @@
 """
 import StringIO
 import re
-from codereviewr.code.models import Comment
+from codereviewr.comments.models import Comment
 from pygments.formatters import HtmlFormatter
 
 class CodereviewerHtmlFormatter(HtmlFormatter):

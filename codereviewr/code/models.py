@@ -58,32 +58,3 @@ class Language(models.Model):
         cls.objects.all().delete() # purge all languages
         for l in languages:
             Language(name=l).save() # add language
-
-class Comment(models.Model):
-	"""
-	Core comments model for code comments
-	"""
-	author = models.CharField(blank=False,max_length=25)
-	email = models.EmailField(blank=False)
-	code = models.ForeignKey(Code, related_name='comments')
-	lineno = models.IntegerField(blank=True, null=True)
-	comment = models.TextField(blank=False)
-	date = models.DateTimeField(default=datetime.now)
-	user = models.ForeignKey(User,blank=True,null=True,related_name="comments")
-	
-	"""
-	def save(self):
-		user = User.objects.filter(username=self.author,email=self.email) 
-		
-		if user.count()==1: 
-			self.author_is_user = True
-		super(Comment,self).save()
-	"""
-	def __unicode__(self):
-		return "comment on %s by %s" % (self.code.title, self.author)
-		
-	class Admin:
-		list_display = ('author','email', 'code', 'lineno','comment','user')
-	
-	class Meta:
-		ordering = ('date',)
