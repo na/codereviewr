@@ -1,0 +1,19 @@
+﻿			<ul>
+			{% for comment in comments %}
+			<li class="comment line-{{comment.lineno}}">
+				<dt>
+					{% if comment.author_is_user %}
+						<a href="{{code.author.get_absolute_url}}">{{comment.author}}</a> ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:							
+					{% else %}
+						{{comment.author}} ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:
+					{% endif %}
+				</dt>
+				<dd>
+					{{comment.comment}}
+				</dd>
+			</li>
+			{% endfor %}
+			</ul>
+			<form method="post" action=postComment id="commentform" >
+			{{ form.as_p }}
+			<input type="submit">
