@@ -18,7 +18,12 @@
 		var contentOffset = $('#page-content').offset();
 		var offset = lineOffset.top-contentOffset.top;
 		var url = "/code/1/comments/line/" + lineno;
-		comments.load(url);
+		comments.load(url,function(){
+            $('#commentform').submit(function(){
+                submitComment(lineno);
+                return false;
+            });
+        });
 		if (comments.css('display')=='none'){
 			comments.css('top',offset);
 			lineOverlay.css('top',offset);
@@ -49,3 +54,31 @@
 		return false;
     });
  });
+ 
+ function submitComment(lineno){
+    var formdata = $('#commentform :input').getFormData();
+    $.post("comments/line/" + lineno,formdata,function(data){
+        process(data);
+    }, "html");
+ };
+ function process(data){
+    $('#comments').html(data);
+ };
+ $.fn.getFormData = function(){
+    var data = {}    
+    this.each(function(){
+        var type = this.type, tag = this.tagName.toLowerCase();
+        var name = this.name;
+        if (tag == 'form')
+            return $(':input',this).getFormData();
+        if (type == 'text' || type == 'password' || tag == 'textarea' || tag== 'select')
+            var val = this.value;
+        else if (type == 'checkbox' || type == 'radio')
+            var val = this.checked;
+        
+        var extend = new Array; 
+        extend[name] = val
+        $.extend(data,extend)
+    });
+    return data;
+  };

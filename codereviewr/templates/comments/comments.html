@@ -10,26 +10,8 @@
 	        <a href="" title="" style="display:block">Hide Meta</a>
 	        <a href="" title="" style="display:none">Show Meta</a>
 	    </div>
-		<ol id="commentlist">
-		{% for comment in comments %}
-			{% if comment.lineno%}
-				{% include "comments/line_comment.html" %}
-			{% else %}
-			<li class="comment">
-				<dt>
-					{% if comment.user %}
-						<a href="{{code.user.get_absolute_url}}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:
-					{% else %}
-						{{comment.author}} said {{ comment.date|timesince }} ago:
-					{% endif %}
-				</dt>
-				<dd>{{comment.comment}}</dd>
-			</li>
-			{% endif %}
-		{% endfor %}
-		</ol>
-		<form method="post" action="" id="commentform" >
-		{{ form.as_p }}
-		<input type="submit">
+		<div id="commentlist">
+		{% include "comments/comment_list.html" %}
+		</div>
 	</div>
 {% endblock %}
