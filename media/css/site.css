@@ -74,11 +74,17 @@ em {background:none;}
 #login input#id_openid_url {background: url('../imgs/login-bg.gif') no-repeat #fff; background-position: 0 50%; padding-left: 16px;}
 
 /* Comments */
-#comments{position:absolute;width:auto;left:70%;;margin-top:-.5em;}
-#comments{display:none;float:right;width:350px;height:250px;overflow:auto;background-color:#ccc;}
-#lineoverlay{width:0;height:1.5em;opacity:0.25;background:#FF4444;border-top:1px solid red;border-bottom:1px solid red;position:absolute;margin-top:-.5em;margin-left:10px;}
+#commentlist{overflow: auto; height: 250px; padding-left: 20px;}
+.lineno:hover .nocomment{background:url(../imgs/nocommentflag_bgnd.png) top right no-repeat;}
+#comment-nav {float:right;}
+#comment-nav li{display:inline; list-style:none;}
+#comment-wrap{position:absolute;left:60%;;margin-top:-.5em;display:none;width:450px;background:#ccc2a2;border:2px solid;padding:5px;}
+#lineoverlay{width:0;height:1.5em;opacity:0.25;background:rgb(90,75,46);border-top:1px solid brown;border-bottom:1px solid brown;position:absolute;margin-top:-.5em;margin-left:10px;}
 .commentcount table tr{height:1.5em;}
-.commentflag{float:left;margin-left:-37px; min-width:32px; color:white;padding-left:5px;}
+.commentflag{float:left;margin-left:-37px; width:32px; color:white;padding-left:5px;height:1.5em;}
 .hascomment {background:url(../imgs/commentflag_bgnd.png) top right no-repeat;}
+.nocomment{}
+.errorlist{display:none;}
+#commentform  textarea {height:3em;}
 /*Code Detail*/
 .sourcetable table td{padding:0px 0px 0px 5px;}
