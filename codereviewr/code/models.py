@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿from difflib import unified_diff
+from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from datetime import datetime
@@ -41,9 +42,16 @@ class Code(models.Model):
     is_public = models.BooleanField(default=True)
     created = models.DateTimeField(default=datetime.now)
     updated = models.DateTimeField(blank=True, default=datetime.now)
- 
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='child_set')
+    
     def __unicode__(self):
         return "%s by %s" % (self.title, self.author.get_full_name())
+    
+    def compare_to_parent(self, lines=3):
+        #diff = Differ()
+        #comp = list(diff.compare(code.parent.code.split('\n'),code.code.split('\n')))
+        comp = list(unified_diff(self.parent.code.split('\n'),self.code.split('\n'),'orig.','sugg.',n=lines))
+        return ''.join(comp)
 
     def get_absolute_url(self):
         return ('code_detail', [str(self.id)])
@@ -64,3 +72,31 @@ class Code(models.Model):
     class Admin:
         list_display = ('title','author','is_public','created')
  
+class Comment(models.Model):
+    """
+    Core comments model for code comments
+    """
+    author = models.CharField(blank=False, max_length=100)
+    email = models.EmailField(blank=False)
+    code = models.ForeignKey(Code, related_name='comments')
+    lineno = models.IntegerField(blank=True, null=True)
+    comment = models.TextField(blank=False)
+    date = models.DateTimeField(default=datetime.now)
+    user = models.ForeignKey(User, blank=True, null=True, related_name="comments")
+    
+    """
+    def save(self):
+        user = User.objects.filter(username=self.author,email=self.email) 
+        
+        if user.count()==1: 
+            self.author_is_user = True
+        super(Comment,self).save()
+    """
+    def __unicode__(self):
+        return "comment on %s by %s" % (self.code.title, self.author)
+        
+    class Admin:
+        list_display = ('author','email', 'code', 'lineno','comment','user')
+    
+    class Meta:
+        ordering = ('date',)
