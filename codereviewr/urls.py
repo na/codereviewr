@@ -6,18 +6,17 @@ from codereviewr.feeds import *
 
 #feeds dictionary
 feeds = {
-	'code': CodeFeed,
-	'comments': LatestCommentsFeed,
-	'language': LanguageFeed,
-	'latest': LatestFeed,
-	'user': UserFeed,
+    'code': CodeFeed,
+    'comments': LatestCommentsFeed,
+    'language': LanguageFeed,
+    'latest': LatestFeed,
+    'user': UserFeed,
 }
 
 urlpatterns = patterns('',
     (r'^code/', include('codereviewr.code.urls')),
     
     # Admin
-    (r'^admin/code/language/refresh/$', 'code.views.refresh_languages'),
     (r'^admin/', include('django.contrib.admin.urls')),
 
     # account registration

@@ -58,7 +58,7 @@ class Code(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
 
     def save(self):
-        # TODO: Check if we need to add updated here or if the default takes care of it
+        self.updated = datetime.now()
         self.code_html = highlight(
             self.code,
             self.language.get_lexer(),
