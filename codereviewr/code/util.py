@@ -37,7 +37,7 @@ class CodereviewerHtmlFormatter(HtmlFormatter):
                 yield i, t
                 j += 1
         yield 0, '</table></pre>'
-				
+
 class LineLinkHtmlFormatter(HtmlFormatter):
     """override to include anchor tags around the line numbers"""
     def _wrap_tablelinenos(self, inner):
@@ -55,12 +55,12 @@ class LineLinkHtmlFormatter(HtmlFormatter):
         la = self.lineanchors
         if sp:
             ls = '\n'.join([(i%st == 0 and
-                             (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
-                              or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+                             (i%sp == 0 and '<a name="%s-%d" class="special">%*d</a>'
+                              or '<a name="%s-%d">%*d</a>') % (la, i, mw, i)
                              or '')
                             for i in range(fl, fl + lncount)])
         else: 
-            ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+            ls = '\n'.join([(i%st == 0 and ('<a name="%s-%d">%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
                             for i in range(fl, fl + lncount)])
             #ls = ''
             #for i in range (fl, fl+ lncount):

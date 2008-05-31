@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from datetime import datetime
 from pygments import formatters, highlight, lexers
+from codereviewr.code.util import LineLinkHtmlFormatter
 
 class Language(models.Model):
     """
@@ -62,7 +63,7 @@ class Code(models.Model):
         self.code_html = highlight(
             self.code,
             self.language.get_lexer(),
-            formatters.HtmlFormatter(linenos=True)
+            LineLinkHtmlFormatter(linenos='table', lineanchors='line')
         )
         super(Code, self).save()
         

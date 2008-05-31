@@ -28,6 +28,7 @@ class CommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ('name', 'email', 'comment')
+
 #
 # VIEWS
 #
