@@ -6,6 +6,9 @@
  */
  
 $(document).ready(function(){
+	$('#comments').dialog();
+	$('#comments').dialog('close');
+	
 	$('.linenos a').click(function(){
 		//show comments
 		var line = $(this);
@@ -32,7 +35,7 @@ $(document).ready(function(){
 			comments.animate({top:offset},500);
 			lineOverlay.animate({top:offset},500);
 		};
-		
+
 		if (location.pathname == this.pathname && location.host == this.host) {
 			var target = $(this.hash);
 			$target = target.size() && target || $("[@name=" + this.hash.slice(1) +']');
@@ -44,4 +47,5 @@ $(document).ready(function(){
 		};
 		return false;
 	});
+	
 });

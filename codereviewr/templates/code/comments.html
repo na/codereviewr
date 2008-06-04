@@ -20,7 +20,7 @@
 						{% if comment.user %}
 							<a href="{{ code.user.get_absolute_url }}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:
 						{% else %}
-							{{ comment.author }} said {{ comment.date|timesince }} ago:
+							{{ comment.name }} said {{ comment.date|timesince }} ago:
 						{% endif %}
 					</dt>
 					<dd>{{ comment.comment }}</dd>

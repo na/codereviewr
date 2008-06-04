@@ -9,7 +9,7 @@ from codereviewr.code.models import Code, Language, Comment
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
-from codereviewr.code.util import *
+
 #
 # FORMS
 #
@@ -107,9 +107,9 @@ def code_comments(request, code_id):
             new_comment = form.save(commit=False)
             new_comment.code_id = code_id
             if request.user.get_full_name():
-                new_comment.author = request.user.get_full_name()
+                new_comment.name = request.user.get_full_name()
             else:
-                new_comment.author = request.user.username
+                new_comment.name = request.user.username
             new_comment.email = request.user.email
             new_comment.user_id = request.user.id
             new_comment.save()
@@ -117,7 +117,12 @@ def code_comments(request, code_id):
             pass #some error
     else:
         form = CommentForm(request.POST)
-        # form.is_valid()? for anonymous users
+        if form.is_valid():
+            new_comment = form.save(commit=false)
+            new_comment.code_id = code_id
+            new_comment.save()
+        else:
+        	pass #some error
         
     return render_to_response(
         'code/comments.html', {
@@ -138,6 +143,7 @@ def code_line_comments(request, code_id, line_no):
             code = Code.objects.get(pk=code_id)
         except Code.DoesNotExisit:
             raise Http404, "Sorry, you requested comments for a code that does not exist."
+        
     else:
         return HttpResponseRedirect(reverse(code_comments, args=(code_id,)))
 
