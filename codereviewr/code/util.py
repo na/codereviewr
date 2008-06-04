@@ -18,96 +18,103 @@
 """
 import StringIO
 import re
+from codereviewr.comments.models import Comment
 from pygments.formatters import HtmlFormatter
-from codreviewr.code.models import Comment
 
 class CodereviewerHtmlFormatter(HtmlFormatter):
-        def wrap(self, source, outfile):
-            return self._wrap_code(source)
 
-        def _wrap_code(self, source):
-            j=1
-            yield 0, '<pre><table>'
-            for i, t in source:
-                if i == 1:
-                    b = '<tr class="line-%d"><td>' % j
-                    e = '</td></tr>'
-                    t = b+t+e
-                    # it's a line of formatted code
-                    yield i, t
-                    j += 1
-            yield 0, '</table></pre>'
+		def wrap(self, source, outfile):
+			return self._wrap_code(source)
 
-        """override to include anchor tags around the line numbers"""
-        def _wrap_tablelinenos(self, inner):
-            dummyoutfile = StringIO.StringIO()
-            lncount = 0
-            for t, line in inner:
-                if t:
-                    lncount += 1
-                dummyoutfile.write(line)
-            fl = self.linenostart
-            mw = len(str(lncount + fl - 1))
-            sp = self.linenospecial
-            st = self.linenostep
-            la = self.lineanchors
-            if sp:
-                ls = '\n'.join([(i%st == 0 and
-                                 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
-                                  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
-                                 or '')
-                                for i in range(fl, fl + lncount)])
-            else:
-                """ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
-                                for i in range(fl, fl + lncount)])
-                """
-                ls = ''
-                linecomments = ''
-                for i in range (fl, fl+ lncount):
-                    comments = Comment.objects.filter(lineno=i)
-                    if comments.count() > 0:
-                        ls = ls + '<tr><td class="lineno line-%d"><div class="commentflag hascomment">%d</div><a href=#%s-%d>%d</a></td></tr>' % (i,comments.count(),la,i,i)
-                    else:
-                        ls = ls + '<tr><td class="lineno line-%d"><div class="commentflag nocomment"></div><a href=#%s-%d>%d</a></td></tr>' % (i,la,i,i)
+		def _wrap_code(self, source):
+			j=1
+			yield 0, '<pre><table>'
+			for i, t in source:
+				if i == 1:
+					b = '<tr id="line-%d"><td>' % j
+					e = '</td></tr>'
+					t = b+t+e
+					# it's a line of formatted code
+					yield i, t
+					j += 1
+			yield 0, '</table></pre>'
 
-            yield 0, ('<table class="%stable">' % self.cssclass +
-                      '<tr><td class="linenos"><pre><table>' +
-                      ls + '</table></pre></td><td class="code">')
-            yield 0, dummyoutfile.getvalue()
-            yield 0, '</td></tr></table>'
-
+		"""override to include anchor tags around the line numbers"""
+		def _wrap_tablelinenos(self, inner):
+			dummyoutfile = StringIO.StringIO()
+			lncount = 0
+			for t, line in inner:
+				if t:
+					lncount += 1
+				dummyoutfile.write(line)
+			
+			fl = self.linenostart
+			mw = len(str(lncount + fl - 1))
+			sp = self.linenospecial
+			st = self.linenostep
+			la = self.lineanchors
+			if sp:
+				ls = '\n'.join([(i%st == 0 and
+								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
+								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+								 or '')
+								for i in range(fl, fl + lncount)])
+			else: 
+				"""ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+								for i in range(fl, fl + lncount)])
+				"""
+				ls = ''
+				linecomments = ''
+				for i in range (fl, fl+ lncount):
+					comments = Comment.objects.filter(lineno=i)
+					if comments.count() > 0:
+						ls = ls + '<tr><td class="lineno"><div class="commentflag hascomment">%d</div><a href=#%s-%d>%d</a></td></tr>' % (comments.count(),la,i,i)
+					else:
+						ls = ls + '<tr><td class="lineno"><div class="commentflag nocomment"></div><a href=#%s-%d>%d</a></td></tr>' % (la,i,i)
+					
+			yield 0, ('<table class="%stable">' % self.cssclass +
+					  '<tr><td class="linenos"><pre><table>' + 
+					  ls + '</table></pre></td><td class="code">')
+			yield 0, dummyoutfile.getvalue()
+			yield 0, '</td></tr></table>'
+			
 class LineLinkHtmlFormatter(HtmlFormatter):
-    """override to include anchor tags around the line numbers"""
-    def _wrap_tablelinenos(self, inner):
-        dummyoutfile = StringIO.StringIO()
-        lncount = 0
-        for t, line in inner:
-            if t:
-                lncount += 1
-            dummyoutfile.write(line)
-        
-        fl = self.linenostart
-        mw = len(str(lncount + fl - 1))
-        sp = self.linenospecial
-        st = self.linenostep
-        la = self.lineanchors
-        if sp:
-            ls = '\n'.join([(i%st == 0 and
-                             (i%sp == 0 and '<a name="%s-%d" class="special">%*d</a>'
-                              or '<a name="%s-%d">%*d</a>') % (la, i, mw, i)
-                             or '')
-                            for i in range(fl, fl + lncount)])
-        else: 
-            ls = '\n'.join([(i%st == 0 and ('<a name="%s-%d">%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
-                            for i in range(fl, fl + lncount)])
-            #ls = ''
-            #for i in range (fl, fl+ lncount):
-            #	ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i) 
-        yield 0, ('<table class="%stable">' % self.cssclass +
-                  '<tr><td class="linenos"><pre>' + 
-                  ls + '</pre></td><td class="code">')
-        yield 0, dummyoutfile.getvalue()
-        yield 0, '</td></tr></table>'
+		"""override to include anchor tags around the line numbers"""
+		def _wrap_tablelinenos(self, inner):
+			dummyoutfile = StringIO.StringIO()
+			lncount = 0
+			for t, line in inner:
+				if t:
+					lncount += 1
+				dummyoutfile.write(line)
+			
+			fl = self.linenostart
+			mw = len(str(lncount + fl - 1))
+			sp = self.linenospecial
+			st = self.linenostep
+			la = self.lineanchors
+			if sp:
+				ls = '\n'.join([(i%st == 0 and
+								 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
+								  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
+								 or '')
+								for i in range(fl, fl + lncount)])
+			else: 
+				"""ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
+								for i in range(fl, fl + lncount)])
+				"""
+				ls = ''
+				linecomments = ''
+				for i in range (fl, fl+ lncount):
+					comments = Comment.objects.filter(lineno=i)
+					linecomments = linecomments + Str(comments.count()) + '/n'
+					ls = ls + '<a href=%s-%d>%d</a>\n' % (la,i,i)
+					
+			yield 0, ('<table class="%stable">' % self.cssclass +
+					  '<tr><td class="linenos"><pre>' + 
+					  ls + '</pre></td><td class="code">')
+			yield 0, dummyoutfile.getvalue()
+			yield 0, '</td></tr></table>'
 
 class DiffHtmlFormatter(HtmlFormatter):
     def wrap(self, source, outfile):
