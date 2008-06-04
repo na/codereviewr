@@ -95,6 +95,3 @@ def code_add(request):
 def refresh_languages(request):
 	Language.load_languages()
 	return HttpResponseRedirect('/admin/code/language/')
-def update_languages(request):
-	Language.load_languages()
-	return HttpResponseRedirect('/admin/code/language/')

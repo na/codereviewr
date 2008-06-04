@@ -1,17 +1,13 @@
-﻿            {% if line_no %}
-                <h3>Comments: Line {{line_no}}</h3>
-            {% else %}
-                <h3>Comments</h3>
-            {% endif %}		
+﻿			
             <ol id="commentlist">
 			{% for comment in comments %}
-			{% if comment.lineno and comment.is_public %}
+			{% if comment.lineno %}
             <li class="comment line-{{comment.lineno}}">
 				<dt>
 					{% if comment.user %}
-						<a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">Line {{comment.lineno}}</a>: <a href="{{comment.user.get_absolute_url}}">{{comment.name}}</a> said {{ comment.date|timesince }} ago:							
+						<a href="{{comment.user.get_absolute_url}}">{{comment.author}}</a> ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:							
 					{% else %}
-						<a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">Line {{comment.lineno}}</a>: {{comment.name}} said {{ comment.date|timesince }} ago:
+						{{comment.author}} ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:
 					{% endif %}
 				</dt>
 				<dd>
@@ -22,9 +18,9 @@
             <li class="comment">
 				<dt>
 					{% if comment.user %}
-						<a href="{{comment.user.get_absolute_url}}">{{comment.name}}</a> said {{ comment.date|timesince }} ago:							
+						<a href="{{comment.user.get_absolute_url}}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:							
 					{% else %}
-						{{comment.name}} said {{ comment.date|timesince }} ago:
+						{{comment.author}} said {{ comment.date|timesince }} ago:
 					{% endif %}
 				</dt>
 				<dd>
@@ -34,9 +30,7 @@
             {% endif %}
 			{% endfor %}
 			</ol>
-            {% if form %}
             <form method="post" action="" id="commentform" >
                 {{ form.as_p }}
                 <input type="submit">
             </form>
-            {% endif %}
