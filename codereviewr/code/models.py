@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from datetime import datetime
 from pygments import formatters, highlight, lexers
+from codereviewr.code.util import CodeReviewrFormatter
 
 import StringIO
 import re
@@ -46,6 +47,7 @@ class Code(models.Model):
     created = models.DateTimeField(default=datetime.now)
     updated = models.DateTimeField(blank=True, default=datetime.now)
     parent = models.ForeignKey('self', blank=True, null=True, related_name='child_set')
+    lncount = models.IntegerField(editable=False)
     
     def __unicode__(self):
         return "%s by %s" % (self.title, self.author.get_full_name())
@@ -65,7 +67,7 @@ class Code(models.Model):
         self.code_html = highlight(
             self.code,
             self.language.get_lexer(),
-            self.Formatter(linenos='table', lineanchors='line')
+            CodeReviewrFormatter(linenos='table', lineanchors='line',code=self)
         )
         super(Code, self).save()
         
@@ -74,61 +76,6 @@ class Code(models.Model):
  
     class Admin:
         list_display = ('title','author','is_public','created')
-
-    class Formatter(formatters.HtmlFormatter):
-        def wrap(self, source, outfile):
-            return self._wrap_code(source)
-
-        def _wrap_code(self, source):
-            j=1
-            yield 0, '<pre><table>'
-            for i, t in source:
-                if i == 1:
-                    b = '<tr class="line-%d"><td>' % j
-                    e = '</td></tr>'
-                    t = b+t+e
-                    # it's a line of formatted code
-                    yield i, t
-                    j += 1
-            yield 0, '</table></pre>'
-
-        """override to include anchor tags around the line numbers"""
-        def _wrap_tablelinenos(self, inner):
-            dummyoutfile = StringIO.StringIO()
-            lncount = 0
-            for t, line in inner:
-                if t:
-                    lncount += 1
-                dummyoutfile.write(line)
-            fl = self.linenostart
-            mw = len(str(lncount + fl - 1))
-            sp = self.linenospecial
-            st = self.linenostep
-            la = self.lineanchors
-            if sp:
-                ls = '\n'.join([(i%st == 0 and
-                                 (i%sp == 0 and '<a href=#%s-%d class="special">%*d</a>'
-                                  or '<a href=#%s-%d>%*d</a>') % (la, i, mw, i)
-                                 or '')
-                                for i in range(fl, fl + lncount)])
-            else:
-                """ls = '\n'.join([(i%st == 0 and ('<a href=#%s-%d>%*d</a>' % (la, i, mw, i)) or '') # added </a><a href=#>
-                                for i in range(fl, fl + lncount)])
-                """
-                ls = ''
-                linecomments = ''
-                for i in range (fl, fl+ lncount):
-                    comments = Comment.objects.filter(lineno=i)
-                    if comments.count() > 0:
-                        ls = ls + '<tr><td class="lineno line-%d"><div class="commentflag hascomment">%d</div><a href=#%s-%d>%d</a></td></tr>' % (i,comments.count(),la,i,i)
-                    else:
-                        ls = ls + '<tr><td class="lineno line-%d"><div class="commentflag nocomment"></div><a href=#%s-%d>%d</a></td></tr>' % (i,la,i,i)
-
-            yield 0, ('<table class="%stable">' % self.cssclass +
-                      '<tr><td class="linenos"><pre><table>' +
-                      ls + '</table></pre></td><td class="code">')
-            yield 0, dummyoutfile.getvalue()
-            yield 0, '</td></tr></table>'
 
 class Comment(models.Model):
     """
@@ -144,6 +91,9 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return "comment on %s by %s" % (self.code.title, self.name)
+    def save(self):
+    	super(Comment,self).save()
+    	self.code.save()  
     class Admin:
         list_display = ('name','email', 'code', 'lineno','comment','user')
     

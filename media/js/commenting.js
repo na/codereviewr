@@ -6,8 +6,8 @@
  */
 
 $(document).ready(function(){
-	$('#comments').dialog();
-	$('#comments').dialog('close');
+	//$('#comments').dialog();
+	//$('#comments').dialog('close');
 	
 	$('.linenos a').click(function(){
 		//show comments

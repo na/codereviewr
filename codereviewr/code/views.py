@@ -5,8 +5,7 @@ from django.newforms import ModelForm
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.generic.list_detail import object_list, object_detail
-from codereviewr.code.models import Code, Language
-from codereviewr.comments.models import Comment
+from codereviewr.code.models import Code, Language, Comment
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
@@ -42,17 +41,38 @@ def code_detail(request, code_id, compare_to_parent=False):
         code = Code.objects.get(pk=code_id)
     except Code.DoesNotExist:
         raise Http404, "Sorry, the code you requested was not found."
-
+    
     diff_list = Code.objects.filter(parent=code.id)
     
+    #get line comments and process into a dictionary of linenumber: number_of_comments pairs for comments flags
+    comments = code.comments.filter(lineno__gt=0)
+    commentdict= {}
+    if comments:
+        for comment in comments:
+            ln = comment.lineno
+            if commentdict.has_key(ln):
+                commentdict[ln] += 1 
+            else:
+                commentdict[ln] = 1
+
+    commentflags = "<table>"
+    for i in range(1,code.lncount+1):
+        if commentdict.has_key(i):
+            number_of_comments = commentdict[i]
+            commentflags = commentflags + '<tr><td class="hascomment commentflag">%d</td></tr>' % number_of_comments
+        else:
+            commentflags = commentflags + '<tr><td class="nocomment commentflag"></td></tr>' 
+    commentflags = commentflags + '</table>'
+  
     return render_to_response(
         'code/detail.html', {
             'code': code,
             'diff_list': diff_list,
+            'commentflags': commentflags,
         },
         context_instance=RequestContext(request)
     )
-
+    
 def code_list(request):
     """
     Lists all code flagged as is_public.
@@ -91,7 +111,7 @@ def code_add(request):
         context_instance=RequestContext(request)
     )
 
-def code_comments(request, code_id):
+def code_comments(request, code_id,line_no=False):
     """
     Displays comments for a piece of code.
     """
@@ -107,6 +127,7 @@ def code_comments(request, code_id):
         if form.is_valid():
             new_comment = form.save(commit=False)
             new_comment.code_id = code_id
+            new_comment.lineno = line_no
             if request.user.get_full_name():
                 new_comment.name = request.user.get_full_name()
             else:
@@ -116,23 +137,41 @@ def code_comments(request, code_id):
             new_comment.save()
         else:
             pass #some error
+    
+    """        
     else:
         form = CommentForm(request.POST)
         if form.is_valid():
-            new_comment = form.save(commit=false)
+            new_comment = form.save(commit=False)
             new_comment.code_id = code_id
+            new_comment.lineno = line_no
             new_comment.save()
         else:
-        	pass #some error
-        
-    return render_to_response(
-        'code/comments.html', {
-            'code':code,
-            'comments': code.comments.all(),
-            'form': form,
-        },
-        context_instance=RequestContext(request)
-    )
+            pass #some error
+    """
+    if line_no:
+        comments = code.comments.filter(lineno=line_no)
+    else:
+        comments = code.comments.all()
+    
+    if request.is_ajax():
+        return render_to_response(
+            'code/comment_list.html', {
+                'code':code,
+                'comments': comments,
+                'form': form,
+            },
+            context_instance=RequestContext(request)
+        )
+    else:
+        return render_to_response(
+            'code/comments.html', {
+                'code':code,
+                'comments': comments,
+                'form': form,                
+            },
+            context_instance=RequestContext(request)
+        )
     
 def code_line_comments(request, code_id, line_no):
     """
@@ -144,7 +183,16 @@ def code_line_comments(request, code_id, line_no):
             code = Code.objects.get(pk=code_id)
         except Code.DoesNotExisit:
             raise Http404, "Sorry, you requested comments for a code that does not exist."
-        
+
+        return render_to_response(
+            'code/comments.html', {
+                'code':code,
+                'comments': code.comments.all(),
+                'form': form,
+            },
+            context_instance=RequestContext(request)
+        )
+    
     else:
         return HttpResponseRedirect(reverse(code_comments, args=(code_id,)))
 

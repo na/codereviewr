@@ -12,7 +12,14 @@
 			<a href="" title="" style="display:block">Hide Meta</a>
 			<a href="" title="" style="display:none">Show Meta</a>
 		</div>
+		<table class="highlighttable">
+		<tr>
+			<td class="commentflags">
+			{{ commentflags|safe }}
+			</td>
 		{{ code.code_html|safe }}
+		</tr>
+		</table>
 	</div>
 	{% if diff_list %}
 		<ul>

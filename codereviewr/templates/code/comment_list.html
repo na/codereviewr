@@ -1,36 +1,40 @@
 ﻿			
-            <ol id="commentlist">
+			<ol id="commentlist">
 			{% for comment in comments %}
 			{% if comment.lineno %}
-            <li class="comment line-{{comment.lineno}}">
-				<dt>
+			<li class="comment line-{{comment.lineno}}">
+				<dl>
+			    <dt>
 					{% if comment.user %}
-						<a href="{{comment.user.get_absolute_url}}">{{comment.author}}</a> ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:							
+						 <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}" class="linelink">line {{comment.lineno}}</a> <a href="{{comment.user.get_absolute_url}}">{{comment.name}}</a> <span class="meta"> {{ comment.date|timesince }} ago</span>
 					{% else %}
-						{{comment.author}} ripped <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}">line {{comment.lineno}}</a> apart {{ comment.date|timesince }} ago:
+						 <a href="{{code.get_absolute_url}}#line-{{comment.lineno}}" class="linelink">line {{comment.lineno}}</a> {{comment.name}} <span class="meta">{{ comment.date|timesince }} ago</span>
 					{% endif %}
 				</dt>
 				<dd>
 					{{comment.comment}}
 				</dd>
+			    </dl>
 			</li>
-            {% else %}
-            <li class="comment">
-				<dt>
+			{% else %}
+			<li class="comment">
+				<dl>
+			    <dt>
 					{% if comment.user %}
-						<a href="{{comment.user.get_absolute_url}}">{{comment.author}}</a> said {{ comment.date|timesince }} ago:							
+						<a href="{{comment.user.get_absolute_url}}">{{comment.name}}</a> <span class="meta"> {{ comment.date|timesince }} ago</span>
 					{% else %}
-						{{comment.author}} said {{ comment.date|timesince }} ago:
+						{{comment.name}} <span class="meta"> {{ comment.date|timesince }} ago</span>
 					{% endif %}
 				</dt>
 				<dd>
 					{{comment.comment}}
 				</dd>
+				</dl>
 			</li>
-            {% endif %}
+			{% endif %}
 			{% endfor %}
 			</ol>
-            <form method="post" action="" id="commentform" >
-                {{ form.as_p }}
-                <input type="submit">
-            </form>
+			<form method="post" action="" id="commentform" >
+				{{ form.as_p }}
+				<input type="submit">
+			</form>
