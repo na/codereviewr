@@ -163,27 +163,3 @@ def code_comments(request, code_id,line_no=False):
             },
             context_instance=RequestContext(request)
         )
-    
-def code_line_comments(request, code_id, line_no):
-    """
-    Displays line number comments for a piece of code if called by ajax. If not
-    redirects to all comments for the piece of code.
-    """
-    if request.is_ajax():
-        try:
-            code = Code.objects.get(pk=code_id)
-        except Code.DoesNotExisit:
-            raise Http404, "Sorry, you requested comments for a code that does not exist."
-
-        return render_to_response(
-            'code/comments.html', {
-                'code':code,
-                'comments': code.comments.all(),
-                'form': form,
-            },
-            context_instance=RequestContext(request)
-        )
-    
-    else:
-        return HttpResponseRedirect(reverse(code_comments, args=(code_id,)))
-
