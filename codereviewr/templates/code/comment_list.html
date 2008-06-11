@@ -34,7 +34,9 @@
 			{% endif %}
 			{% endfor %}
 			</ol>
+			{% if form %}
 			<form method="post" action="" id="commentform" >
 				{{ form.as_p }}
 				<input type="submit">
 			</form>
+			{% endif %}

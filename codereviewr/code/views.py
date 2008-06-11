@@ -137,18 +137,9 @@ def code_comments(request, code_id,line_no=False):
             new_comment.save()
         else:
             pass #some error
-    
-    """        
     else:
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.code_id = code_id
-            new_comment.lineno = line_no
-            new_comment.save()
-        else:
-            pass #some error
-    """
+        form = False
+        
     if line_no:
         comments = code.comments.filter(lineno=line_no)
     else:
